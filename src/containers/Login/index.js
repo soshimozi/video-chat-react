@@ -1,21 +1,15 @@
 import React, { Component } from "react";
 import styled from 'styled-components';
-
+import { Auth } from "aws-amplify";
 import { Button, FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import "./styles.scss";
 import './bootstrap-social.css';
+import SocialButton from '../../Components/SocialButton';
 
-const SocialButtonStyledButton = styled.button`
-  width: 100%;
-  max-width: 150px;
-`;
+import SignInWithFacebook from '../../Components/FacebookSignInButton';
 
 const LoginLabel = styled.h3`
   margin-bottom: 50px;
-`;
-
-const LoginDiv = styled.div`
-  height: 200px;
 `;
 
 function ButtonContainer(props) {
@@ -34,20 +28,12 @@ function ButtonRow(props) {
   );
 }
 
-function ButtonColumn({buttonType}) {
+function ButtonColumn(props) {
   return (
     <div className="col-md-4">
-      <SocialButton type={buttonType} />
+     {props.children}
     </div>    
   )
-}
-
-function SocialButton({type}) {
-  return (
-    <SocialButtonStyledButton className={`btn btn-social-icon btn-${type}`}>
-      <span className={`fa fa-${type}`}></span>
-    </SocialButtonStyledButton>
-  );
 }
 
 function Seperator({text}) {
@@ -65,6 +51,8 @@ export default class Login extends Component {
   constructor(props) {
     super(props);
 
+    console.log('props', props);
+
     this.state = {
       email: "",
       password: ""
@@ -81,9 +69,17 @@ export default class Login extends Component {
     });
   }
 
-  handleSubmit = event => {
+  handleSubmit = async event => {
     console.log('submit here');
     event.preventDefault();
+
+    try {
+      await Auth.signIn(this.state.email, this.state.password);
+      alert("Logged in");
+    } catch (e) {
+      console.log(e);
+      alert(e.message || e);
+    }    
   }
 
   render() {
@@ -93,9 +89,9 @@ export default class Login extends Component {
         <ConnectWithWrapper>Connect With</ConnectWithWrapper>
         <ButtonContainer>
           <ButtonRow>
-            <ButtonColumn buttonType="facebook"></ButtonColumn>
-            <ButtonColumn buttonType="google"></ButtonColumn>
-            <ButtonColumn buttonType="amazon"></ButtonColumn>
+            <ButtonColumn><SignInWithFacebook {...this.props}></SignInWithFacebook></ButtonColumn>
+            <ButtonColumn><SocialButton type="google"></SocialButton></ButtonColumn>
+            <ButtonColumn><SocialButton type="amazon"></SocialButton></ButtonColumn>
           </ButtonRow>
         </ButtonContainer>
         <Seperator text=" or "/>
